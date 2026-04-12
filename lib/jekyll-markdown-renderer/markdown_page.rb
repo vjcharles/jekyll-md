@@ -12,10 +12,12 @@ module JekyllMarkdownRenderer
       @name = build_filename(source_doc)
       @config = config
 
-      self.data = build_front_matter(source_doc, config)
+      @output_front_matter = build_front_matter(source_doc, config)
       self.content = render_liquid(source_doc)
 
-      self.data["layout"] = nil if config.fetch("strip_layouts", true)
+      # Keep self.data minimal — no title, no layout — so themes don't
+      # pick up synthetic pages in nav, sitemaps, feeds, etc.
+      self.data = { "layout" => nil, "sitemap" => false }
 
       process(@name)
     end
@@ -33,8 +35,8 @@ module JekyllMarkdownRenderer
 
     # Build the final file content: optional front matter + rendered markdown
     def output
-      if @config.fetch("preserve_front_matter", true) && !data_for_front_matter.empty?
-        front = data_for_front_matter.to_yaml.strip + "\n---\n\n"
+      if @config.fetch("preserve_front_matter", true) && !@output_front_matter.empty?
+        front = @output_front_matter.to_yaml.strip + "\n---\n\n"
         front + (self.content || "")
       else
         self.content || ""
@@ -71,7 +73,7 @@ module JekyllMarkdownRenderer
     end
 
     def data_for_front_matter
-      (data || {}).reject { |k, v| v.nil? || %w[output permalink].include?(k) }
+      (@output_front_matter || {}).reject { |k, v| v.nil? || %w[output permalink].include?(k) }
     end
 
     def yaml_safe?(value)
