@@ -38,7 +38,6 @@ plugins:
 markdown_renderer:
   enabled: true
   scope: "all"
-  output_dir: "md"
 
 # Exclude from processing.
 # The following items will not be processed, by default.

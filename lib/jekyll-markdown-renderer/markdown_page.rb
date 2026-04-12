@@ -8,9 +8,18 @@ module JekyllMarkdownRenderer
     def initialize(site, source_doc, output_dir, config)
       @site = site
       @base = site.source
-      @dir  = output_dir
-      @name = build_filename(source_doc)
       @config = config
+
+      if output_dir
+        # Grouped mode: all .md files land in a subdirectory
+        @dir  = output_dir
+        @name = build_filename(source_doc)
+      else
+        # Alongside mode: .md sits next to the .html at the same path
+        url = source_doc.url.to_s
+        @dir  = File.dirname(url).sub(%r{^/}, "")
+        @name = File.basename(url, File.extname(url)) + ".md"
+      end
 
       @output_front_matter = build_front_matter(source_doc, config)
       self.content = render_liquid(source_doc)

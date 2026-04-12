@@ -11,11 +11,12 @@ module JekyllMarkdownRenderer
       return unless config.fetch("enabled", true)
 
       scope      = config.fetch("scope", "all")
-      output_dir = config.fetch("output_dir", "md")
+      output_dir = config.fetch("output_dir", nil)
 
       documents = collect_documents(site, scope)
 
-      Jekyll.logger.info "MarkdownRenderer:", "Processing #{documents.size} document(s) → /#{output_dir}/"
+      mode = output_dir ? "/#{output_dir}/" : "alongside HTML"
+      Jekyll.logger.info "MarkdownRenderer:", "Processing #{documents.size} document(s) → #{mode}"
 
       documents.each do |doc|
         md_page = MarkdownPage.new(site, doc, output_dir, config)
