@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.description   = <<~DESC
     Renders Jekyll pages and posts through the Liquid template engine but stops
     before converting Markdown to HTML. Outputs .md files with processed Liquid
-    tags and intact front matter — like Rails' respond_to for static sites.
+    tags and intact front matter - like Rails' respond_to for static sites.
   DESC
   spec.license       = "MIT"
 

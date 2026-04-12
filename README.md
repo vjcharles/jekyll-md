@@ -1,33 +1,22 @@
 # Jekyll Markdown Renderer
 
-Outputs `.md` files with **Liquid templates rendered** but **Markdown left intact** — like Rails' `respond_to` for static sites.
+A Jekyll plugin that outputs `.md` files with Liquid templates rendered but Markdown left intact.
 
-## The Problem
-
-Jekyll's pipeline: Front Matter → Liquid → Markdown→HTML → Layouts. There's no built-in way to get the output after Liquid processing but *before* HTML conversion. This plugin gives you that.
-
-## Use Cases
-
-- **API-style content delivery** — serve the same post as HTML (for browsers) and Markdown (for readers, RSS, CMS imports)
-- **Content syndication** — export rendered Markdown to other platforms
-- **Markdown-native readers** — provide downloadable `.md` versions of posts
-- **Static site migration** — render Liquid includes/variables but keep Markdown for import into another system
+Your post at `/blog/2026/04/11/my-post.html` gets a sibling at `/blog/2026/04/11/my-post.md` — same content, Liquid resolved, Markdown preserved.
 
 ## Install
-
-### Option A: Drop-in plugin
-
-Copy `_plugins/markdown_renderer.rb` into your Jekyll site's `_plugins/` directory. Done.
-
-### Option B: As a gem
 
 Add to your `Gemfile`:
 
 ```ruby
 group :jekyll_plugins do
-  gem "jekyll-markdown-renderer", path: "/path/to/this/repo"
+  gem "jekyll-markdown-renderer"
 end
 ```
+
+Then `bundle install`.
+
+Or copy `markdown_renderer.rb` into your `_plugins/` directory.
 
 ## Configure
 
@@ -36,93 +25,35 @@ Add to `_config.yml`:
 ```yaml
 markdown_renderer:
   enabled: true
-  scope: "all"           # "all" | "posts" | "pages" | "tagged"
-  output_dir: "md"       # Files land in _site/md/
-  strip_layouts: true     # Don't wrap in HTML layouts
-  preserve_front_matter: true
-  front_matter_fields:    # Omit to keep all fields
-    - title
-    - date
-    - tags
-    - categories
-    - description
+  scope: "all"        # "all" | "posts" | "pages" | "tagged"
 ```
 
-### Scopes
-
-| Scope    | What gets a `.md` output                               |
-|----------|--------------------------------------------------------|
-| `all`    | Every Markdown page and post                           |
-| `posts`  | Only `_posts`                                          |
-| `pages`  | Only standalone Markdown pages                         |
-| `tagged` | Only docs with `markdown_output: true` in front matter |
-
-## Example
-
-Given this source file:
-
-```markdown
----
-title: "Hello World"
-date: 2025-01-15
-tags: [intro, jekyll]
----
-
-Welcome to {{ site.title }}! This post has {{ site.posts.size }} siblings.
-
-{% for tag in page.tags %}
-- Tagged: {{ tag }}
-{% endfor %}
-
-## What's Next
-
-Check out the [about page]({{ "/about" | relative_url }}).
-```
-
-The plugin outputs `_site/md/hello-world.md`:
-
-```markdown
----
-title: Hello World
-date: '2025-01-15'
-tags:
-- intro
-- jekyll
----
-
-Welcome to My Cool Blog! This post has 12 siblings.
-
-- Tagged: intro
-- Tagged: jekyll
-
-## What's Next
-
-Check out the [about page](/about).
-```
-
-Liquid tags are resolved. Markdown stays as Markdown.
-
-## Per-Page Opt-In
-
-If you use `scope: "tagged"`, add this to any page's front matter:
+By default, `.md` files are placed alongside their `.html` counterparts. To group them in a subdirectory instead:
 
 ```yaml
----
-title: "My Post"
-markdown_output: true
----
+markdown_renderer:
+  output_dir: "md"    # all .md files land in _site/md/
 ```
 
-Only tagged pages will get `.md` output.
+### Options
 
-## How It Works
+| Option | Default | Description |
+|--------|---------|-------------|
+| `enabled` | `true` | Master switch |
+| `scope` | `"all"` | Which docs get `.md` output: `all`, `posts`, `pages`, or `tagged` |
+| `output_dir` | none | Set to group `.md` files in a subdirectory (e.g. `"md"`) |
+| `preserve_front_matter` | `true` | Include YAML front matter in output |
+| `front_matter_fields` | all | List of front matter keys to keep (omit to keep all) |
 
-1. A **Generator** runs after Jekyll reads the site, collecting eligible documents
-2. For each document, it renders the raw content through **Liquid** (resolving `{{ }}` and `{% %}`)
-3. It creates a synthetic **Page** with a **passthrough converter** that skips Markdown→HTML
-4. Jekyll writes the result as a `.md` file in your output directory
+### Per-page opt-in
 
-The key trick is overriding `converters` on the synthetic page to return a no-op converter, so Jekyll's normal pipeline writes the file without touching the Markdown.
+With `scope: "tagged"`, only pages with `markdown_output: true` in their front matter get `.md` output.
+
+## How it works
+
+Jekyll's pipeline: Front Matter → Liquid → Markdown → HTML → Layouts.
+
+This plugin intercepts after Liquid rendering but before Markdown-to-HTML conversion. It creates a synthetic page with a passthrough converter that writes the result as `.md`.
 
 ## License
 
