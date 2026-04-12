@@ -98,6 +98,40 @@ class TestMarkdownRenderer < Minitest::Test
     assert md_files.any?, "MD files should exist under /md/"
   end
 
+  # --- HTML normalization ---
+
+  def test_html_list_converted_to_markdown
+    md_path = Dir.glob("#{DEST}/**/html-content.md").first
+    content = File.read(md_path)
+
+    refute content.include?("<ul>"), "HTML list tags should be converted"
+    refute content.include?("<li>"), "HTML list item tags should be converted"
+    assert content.include?("Item one"), "List content should be preserved"
+  end
+
+  def test_html_paragraph_converted_to_markdown
+    md_path = Dir.glob("#{DEST}/**/html-content.md").first
+    content = File.read(md_path)
+
+    refute content.include?("<p>"), "HTML paragraph tags should be converted"
+    assert content.include?("bold"), "Bold content should be preserved"
+    assert content.include?("a link"), "Link text should be preserved"
+  end
+
+  def test_plain_markdown_unchanged
+    md_path = Dir.glob("#{DEST}/**/html-content.md").first
+    content = File.read(md_path)
+
+    assert content.include?("A normal markdown paragraph"), "Plain markdown should pass through"
+    assert content.include?("**bold**"), "Markdown bold should be untouched"
+  end
+
+  # --- Directory-style URLs ---
+
+  def test_index_md_exists_at_root
+    assert File.exist?("#{DEST}/index.md"), "index.md should exist at site root"
+  end
+
   # --- HTML output unaffected ---
 
   def test_html_output_is_normal

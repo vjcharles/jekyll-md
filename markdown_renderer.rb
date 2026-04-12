@@ -105,12 +105,18 @@ module JekyllMarkdownRenderer
       else
         # Alongside mode: .md sits next to the .html at the same path
         url = source_doc.url.to_s
-        @dir  = File.dirname(url).sub(%r{^/}, "")
-        @name = File.basename(url, File.extname(url)) + ".md"
+        if url == "/"
+          @dir  = ""
+          @name = "index.md"
+        else
+          @dir  = File.dirname(url).sub(%r{^/}, "")
+          @name = File.basename(url, File.extname(url)) + ".md"
+        end
       end
 
       @output_front_matter = build_front_matter(source_doc, config)
-      @md_content = render_liquid(source_doc)
+      rendered = render_liquid(source_doc)
+      @md_content = normalize_html_to_markdown(rendered)
       self.content = @md_content
 
       # Keep self.data minimal — no title, no layout — so themes don't
@@ -183,6 +189,27 @@ module JekyllMarkdownRenderer
       else
         false
       end
+    end
+
+    def normalize_html_to_markdown(content)
+      return content unless content.include?("<")
+
+      blocks = content.split(/(\n\n+)/)
+
+      blocks.map do |block|
+        if html_block?(block)
+          converted = Kramdown::Document.new(block, input: "html").to_kramdown.rstrip
+          converted.empty? ? block : converted
+        else
+          block
+        end
+      end.join
+    end
+
+    def html_block?(text)
+      stripped = text.strip
+      return false if stripped.empty?
+      stripped.match?(%r{\A<(?!!)/?[a-zA-Z]})
     end
 
     def render_liquid(source_doc)
