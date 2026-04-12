@@ -2,9 +2,10 @@
 
 module JekyllMarkdownRenderer
   # A converter that does nothing — passes Markdown through as-is.
-  class PassthroughConverter < Jekyll::Converter
-    safe true
-    priority :lowest
+  # Plain class (not a Jekyll::Converter subclass) so Jekyll doesn't
+  # auto-register it globally and interfere with other pages' converter chains.
+  class PassthroughConverter
+    def initialize(_config = {}); end
 
     def matches(_ext)
       true

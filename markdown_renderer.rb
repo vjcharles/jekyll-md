@@ -144,19 +144,36 @@ module JekyllMarkdownRenderer
       raw = source_doc.data.dup
 
       # Remove Jekyll internals that don't belong in output
-      %w[ext output layout].each { |k| raw.delete(k) } if config.fetch("strip_layouts", true)
+      %w[ext output layout excerpt content next previous collection].each { |k| raw.delete(k) }
 
       allowed = config["front_matter_fields"]
       if allowed.is_a?(Array) && !allowed.empty?
         raw.select! { |k, _| allowed.include?(k) }
+      else
+        # Only keep YAML-safe values — reject complex Ruby objects
+        raw.select! { |_k, v| yaml_safe?(v) }
       end
 
       raw
     end
 
     def data_for_front_matter
-      # Filter out nil values and Jekyll internal keys
       (data || {}).reject { |k, v| v.nil? || %w[output permalink].include?(k) }
+    end
+
+    def yaml_safe?(value)
+      case value
+      when String, Integer, Float, TrueClass, FalseClass, NilClass
+        true
+      when Time, Date
+        true
+      when Array
+        value.all? { |v| yaml_safe?(v) }
+      when Hash
+        value.all? { |_k, v| yaml_safe?(v) }
+      else
+        false
+      end
     end
 
     def render_liquid(source_doc)
@@ -182,9 +199,10 @@ module JekyllMarkdownRenderer
   end
 
   # A converter that does nothing — passes Markdown through as-is.
-  class PassthroughConverter < Jekyll::Converter
-    safe true
-    priority :lowest
+  # Plain class (not a Jekyll::Converter subclass) so Jekyll doesn't
+  # auto-register it globally and interfere with other pages' converter chains.
+  class PassthroughConverter
+    def initialize(_config = {}); end
 
     def matches(_ext)
       true
