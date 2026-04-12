@@ -22,7 +22,8 @@ module JekyllMarkdownRenderer
       end
 
       @output_front_matter = build_front_matter(source_doc, config)
-      self.content = render_liquid(source_doc)
+      @md_content = render_liquid(source_doc)
+      self.content = @md_content
 
       # Keep self.data minimal — no title, no layout — so themes don't
       # pick up synthetic pages in nav, sitemaps, feeds, etc.
@@ -36,19 +37,15 @@ module JekyllMarkdownRenderer
       ".md"
     end
 
-    # Override the converters so Markdown is NOT converted to HTML.
-    # We return a passthrough converter instead.
-    def converters
-      [PassthroughConverter.new(@site.config)]
-    end
-
-    # Build the final file content: optional front matter + rendered markdown
+    # Build the final file content: optional front matter + rendered markdown.
+    # Uses @md_content (captured before Jekyll's render step) instead of
+    # self.content (which Jekyll's Renderer overwrites with HTML via Kramdown).
     def output
       if @config.fetch("preserve_front_matter", true) && !@output_front_matter.empty?
         front = @output_front_matter.to_yaml.strip + "\n---\n\n"
-        front + (self.content || "")
+        front + (@md_content || "")
       else
-        self.content || ""
+        @md_content || ""
       end
     end
 
