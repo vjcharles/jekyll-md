@@ -2,7 +2,7 @@
 
 require "minitest/autorun"
 require "jekyll"
-require_relative "../lib/jekyll-markdown-renderer"
+require_relative "../lib/jekyll-md"
 
 class TestMarkdownRenderer < Minitest::Test
   FIXTURES = File.expand_path("fixtures/src", __dir__)

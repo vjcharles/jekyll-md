@@ -1,4 +1,4 @@
-# Jekyll Markdown Renderer
+# jekyll-md
 
 A Jekyll plugin that outputs `.md` files with Liquid templates rendered but Markdown left intact.
 
@@ -10,7 +10,7 @@ Add to your `Gemfile`:
 
 ```ruby
 group :jekyll_plugins do
-  gem "jekyll-markdown-renderer"
+  gem "jekyll-md"
 end
 ```
 

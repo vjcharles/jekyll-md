@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    jekyll-markdown-renderer (0.1.0)
+    jekyll-md (0.1.0)
       jekyll (>= 3.7, < 5.0)
 
 GEM
@@ -174,7 +174,7 @@ DEPENDENCIES
   http_parser.rb (~> 0.6.0)
   jekyll (~> 4.4.1)
   jekyll-feed (~> 0.12)
-  jekyll-markdown-renderer!
+  jekyll-md!
   minima (~> 2.5)
   tzinfo (>= 1, < 3)
   tzinfo-data

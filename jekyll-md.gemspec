@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 Gem::Specification.new do |spec|
-  spec.name          = "jekyll-markdown-renderer"
+  spec.name          = "jekyll-md"
   spec.version       = "0.1.0"
   spec.authors       = ["vjcharles"]
   spec.summary       = "Jekyll plugin that outputs Liquid-rendered Markdown alongside HTML"
